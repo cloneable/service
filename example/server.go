@@ -1,8 +1,3 @@
-# github.com/cloneable/service &mdash; A Go Microservice Foundation
-
-## Usage
-
-```go
 package main
 
 import (
@@ -24,8 +19,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-```
-
-## `service.Init()`
-
-## `service.Run()`
