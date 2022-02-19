@@ -2,15 +2,26 @@ package service
 
 import (
 	"context"
+
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 type serviceContextKey struct{}
 
-func injectMarker(ctx context.Context) context.Context {
-	return context.WithValue(ctx, serviceContextKey{}, "marker")
+type serviceContextValue struct {
+	*serviceContext
 }
 
-func checkMarker(ctx context.Context) bool {
-	v, ok := ctx.Value(serviceContextKey{}).(string)
-	return ok && v == "marker"
+type serviceContext struct {
+	tracerProvider *sdktrace.TracerProvider
+	ready          bool
+}
+
+func getServiceContext(ctx context.Context) (context.Context, *serviceContext) {
+	v, ok := ctx.Value(serviceContextKey{}).(serviceContextValue)
+	if !ok || v.serviceContext == nil {
+		v = serviceContextValue{new(serviceContext)}
+		ctx = context.WithValue(ctx, serviceContextKey{}, v)
+	}
+	return ctx, v.serviceContext
 }

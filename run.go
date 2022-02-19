@@ -6,7 +6,8 @@ import (
 )
 
 func Run(ctx context.Context, options ...RunOption) error {
-	if !checkMarker(ctx) {
+	ctx, svcCtx := getServiceContext(ctx)
+	if !svcCtx.ready {
 		return errors.New("Run() called with wrong context")
 	}
 

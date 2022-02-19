@@ -7,9 +7,11 @@ import (
 )
 
 func Init(ctx context.Context, options ...InitOption) (context.Context, error) {
-	ctx = injectMarker(ctx)
+	ctx, svcCtx := getServiceContext(ctx)
 	ctx = log.Inject(ctx)
-	ctx, _ = initTracing(ctx)
+	ctx, tp := initTracing(ctx)
+
+	svcCtx.tracerProvider = tp
 
 	var cfg InitConfig
 	for _, option := range options {
@@ -19,6 +21,8 @@ func Init(ctx context.Context, options ...InitOption) (context.Context, error) {
 			}
 		}
 	}
+
+	svcCtx.ready = true
 	return ctx, nil
 }
 
