@@ -15,13 +15,18 @@ import (
 	"go.uber.org/zap"
 )
 
-func initTracing(ctx context.Context) context.Context {
+func initTracing(ctx context.Context) (context.Context, *sdktrace.TracerProvider) {
 	l := log.L(ctx)
+
+	otelLogger := l.WithOptions(zap.AddCallerSkip(2))
+	otel.SetErrorHandler(errLogger{otelLogger})
+	otel.SetLogger(zapr.NewLogger(otelLogger))
 
 	f, err := os.Create("traces.txt")
 	if err != nil {
 		l.Sugar().Fatal(err)
 	}
+
 	exporter, err := stdouttrace.New(
 		stdouttrace.WithWriter(f),
 		stdouttrace.WithPrettyPrint(),
@@ -29,6 +34,7 @@ func initTracing(ctx context.Context) context.Context {
 	if err != nil {
 		l.Sugar().Fatal(err)
 	}
+
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(resource.NewWithAttributes(
@@ -36,14 +42,16 @@ func initTracing(ctx context.Context) context.Context {
 			semconv.ServiceNameKey.String("service"),
 			semconv.ServiceVersionKey.String("v0.0.0"),
 		)),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 
 	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(propagation.TraceContext{})
-	otel.SetLogger(zapr.NewLogger(l))
-	otel.SetErrorHandler(errLogger{l})
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
 
-	return ctx
+	return ctx, tp
 }
 
 type errLogger struct {

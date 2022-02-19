@@ -7,8 +7,9 @@ import (
 )
 
 func Init(ctx context.Context, options ...InitOption) (context.Context, error) {
+	ctx = injectMarker(ctx)
 	ctx = log.Inject(ctx)
-	ctx = initTracing(ctx)
+	ctx, _ = initTracing(ctx)
 
 	var cfg InitConfig
 	for _, option := range options {

@@ -1,8 +1,15 @@
 package service
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 func Run(ctx context.Context, options ...RunOption) error {
+	if !checkMarker(ctx) {
+		return errors.New("Run() called with wrong context")
+	}
+
 	var cfg RunConfig
 	for _, option := range options {
 		if option != nil {

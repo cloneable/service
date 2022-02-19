@@ -22,6 +22,9 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	zap.ReplaceGlobals(globalLogger)
+	zap.RedirectStdLog(globalLogger)
 }
 
 func Inject(ctx context.Context) context.Context {
