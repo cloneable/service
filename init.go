@@ -1,8 +1,15 @@
 package service
 
-import "context"
+import (
+	"context"
+
+	"github.com/cloneable/service/log"
+)
 
 func Init(ctx context.Context, options ...InitOption) (context.Context, error) {
+	ctx = log.Inject(ctx)
+	ctx = initTracing(ctx)
+
 	var cfg InitConfig
 	for _, option := range options {
 		if option != nil {

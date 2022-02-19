@@ -2,20 +2,20 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"github.com/cloneable/service"
+	"github.com/cloneable/service/log"
 )
 
 func main() {
 	ctx, err := service.Init(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		log.S(ctx).Fatal(err)
 	}
 
 	// Set up server(s)...
 
 	if err := service.Run(ctx); err != nil {
-		log.Fatal(err)
+		log.S(ctx).Fatal(err)
 	}
 }
