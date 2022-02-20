@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 type serviceContextKey struct{}
@@ -13,8 +11,10 @@ type serviceContextValue struct {
 }
 
 type serviceContext struct {
-	tracerProvider *sdktrace.TracerProvider
-	ready          bool
+	initConfig InitConfig
+	runConfig  RunConfig
+
+	ready bool
 }
 
 func getServiceContext(ctx context.Context) (context.Context, *serviceContext) {
