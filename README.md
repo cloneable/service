@@ -1,4 +1,4 @@
-# github.com/cloneable/service &mdash; A Go Microservice Foundation
+# github.com/cloneable/service &mdash; A Go Microservice Chassis
 
 ## Usage
 
