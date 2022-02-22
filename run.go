@@ -15,7 +15,7 @@ func Run(ctx context.Context, options ...RunOption) error {
 
 	for _, option := range options {
 		if option != nil {
-			if err := option(ctx, &svcCtx.runConfig); err != nil {
+			if err := option.apply(ctx, &svcCtx.runConfig); err != nil {
 				return err
 			}
 		}
@@ -30,15 +30,21 @@ func Run(ctx context.Context, options ...RunOption) error {
 	return nil
 }
 
-type RunOption func(ctx context.Context, cfg *RunConfig) error
-
-type RunConfig struct {
+type runConfig struct {
 	ShutdownCallbacks []func(context.Context) error
 }
 
+type RunOption interface {
+	apply(ctx context.Context, cfg *runConfig) error
+}
+
+type runOptionFunc func(ctx context.Context, cfg *runConfig) error
+
+func (f runOptionFunc) apply(ctx context.Context, cfg *runConfig) error { return f(ctx, cfg) }
+
 func WithShutdownCallback(fn func(context.Context) error) RunOption {
-	return func(ctx context.Context, cfg *RunConfig) error {
+	return runOptionFunc(func(ctx context.Context, cfg *runConfig) error {
 		cfg.ShutdownCallbacks = append(cfg.ShutdownCallbacks, fn)
 		return nil
-	}
+	})
 }

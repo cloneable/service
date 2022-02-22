@@ -13,22 +13,28 @@ func Init(ctx context.Context, options ...InitOption) (context.Context, error) {
 
 	for _, option := range options {
 		if option != nil {
-			if err := option(ctx, &svcCtx.initConfig); err != nil {
+			if err := option.apply(ctx, &svcCtx.initConfig); err != nil {
 				return ctx, err
 			}
 		}
 	}
 
 	ctx, tp := initTracing(ctx)
-	svcCtx.initConfig.TracerProvider = tp
+	svcCtx.initConfig.tracerProvider = tp
 	svcCtx.runConfig.ShutdownCallbacks = append(svcCtx.runConfig.ShutdownCallbacks, tp.Shutdown)
 
 	svcCtx.ready = true
 	return ctx, nil
 }
 
-type InitOption func(ctx context.Context, cfg *InitConfig) error
-
-type InitConfig struct {
-	TracerProvider *sdktrace.TracerProvider
+type initConfig struct {
+	tracerProvider *sdktrace.TracerProvider
 }
+
+type InitOption interface {
+	apply(ctx context.Context, cfg *initConfig) error
+}
+
+type initOptionFunc func(ctx context.Context, cfg *runConfig) error
+
+func (f initOptionFunc) apply(ctx context.Context, cfg *runConfig) error { return f(ctx, cfg) }

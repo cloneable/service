@@ -11,8 +11,8 @@ type serviceContextValue struct {
 }
 
 type serviceContext struct {
-	initConfig InitConfig
-	runConfig  RunConfig
+	initConfig initConfig
+	runConfig  runConfig
 
 	ready bool
 }
