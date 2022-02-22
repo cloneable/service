@@ -20,9 +20,8 @@ func main() {
 
 	// Set up server(s)...
 
-	if err := service.Run(ctx); err != nil {
-		log.Fatal(err)
-	}
+	// Run() comes last. It never returns.
+	service.Run(ctx)
 }
 ```
 

@@ -2,36 +2,38 @@ package service
 
 import (
 	"context"
-	"errors"
+	"os"
 
 	"github.com/cloneable/service/log"
 )
 
-func Run(ctx context.Context, options ...RunOption) error {
+func Run(ctx context.Context, options ...RunOption) {
 	ctx, svcCtx := getServiceContext(ctx)
 	if !svcCtx.ready {
-		return errors.New("Run() called with wrong context")
+		log.L(ctx).Fatal("Run() called with wrong context")
 	}
 
 	for _, option := range options {
 		if option != nil {
 			if err := option.apply(ctx, &svcCtx.runConfig); err != nil {
-				return err
+				log.S(ctx).Fatalf("RunOption failed: %v", err)
 			}
 		}
 	}
 
 	// TODO: move into shutdown handler
-	for _, fn := range svcCtx.runConfig.ShutdownCallbacks {
+	for _, fn := range svcCtx.runConfig.shutdownCallbacks {
 		if err := fn(ctx); err != nil {
 			log.S(ctx).Errorf("shutdown function failed: %v", err)
 		}
 	}
-	return nil
+
+	// TODO: add termination function, overridable
+	os.Exit(0)
 }
 
 type runConfig struct {
-	ShutdownCallbacks []func(context.Context) error
+	shutdownCallbacks []func(context.Context) error
 }
 
 type RunOption interface {
@@ -44,7 +46,7 @@ func (f runOptionFunc) apply(ctx context.Context, cfg *runConfig) error { return
 
 func WithShutdownCallback(fn func(context.Context) error) RunOption {
 	return runOptionFunc(func(ctx context.Context, cfg *runConfig) error {
-		cfg.ShutdownCallbacks = append(cfg.ShutdownCallbacks, fn)
+		cfg.shutdownCallbacks = append(cfg.shutdownCallbacks, fn)
 		return nil
 	})
 }

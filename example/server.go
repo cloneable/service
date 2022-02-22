@@ -25,9 +25,7 @@ func main() {
 
 	doSomething(ctx)
 
-	if err := service.Run(ctx); err != nil {
-		log.S(ctx).Fatal(err)
-	}
+	service.Run(ctx)
 }
 
 func doSomething(ctx context.Context) {

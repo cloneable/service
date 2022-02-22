@@ -21,7 +21,7 @@ func Init(ctx context.Context, options ...InitOption) (context.Context, error) {
 
 	ctx, tp := initTracing(ctx)
 	svcCtx.initConfig.tracerProvider = tp
-	svcCtx.runConfig.ShutdownCallbacks = append(svcCtx.runConfig.ShutdownCallbacks, tp.Shutdown)
+	svcCtx.runConfig.shutdownCallbacks = append(svcCtx.runConfig.shutdownCallbacks, tp.Shutdown)
 
 	svcCtx.ready = true
 	return ctx, nil
